@@ -71,7 +71,7 @@ public class MerchantController {
         }
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteMerchant(@PathVariable("id") String id) {
         if (merchantService.deleteMerchant(id)) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
