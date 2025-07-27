@@ -44,4 +44,22 @@ public class CategoryController {
         categoryService.addCategory(category);
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateCategory(@PathVariable("id") String id, @Valid @RequestBody Category category, Errors errors) {
+        // Check for validation errors
+        if (errors.hasErrors()) {
+            ArrayList<String> errorMessages = new ArrayList<>();
+            for (FieldError error : errors.getFieldErrors())
+                errorMessages.add(error.getDefaultMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
+        }
+
+        if (categoryService.updateCategory(id, category)) {
+            return ResponseEntity.status(HttpStatus.OK).body(category);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Category not found."));
+        }
+    }
 }
