@@ -41,8 +41,11 @@ public class CategoryController {
         }
 
         // add category
-        categoryService.addCategory(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(category);
+        if (categoryService.addCategory(category)) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(category);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("ID is already in use."));
+        }
     }
 
     @PutMapping("/update/{id}")
@@ -56,8 +59,11 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
         }
 
-        if (categoryService.updateCategory(id, category)) {
+        Integer status = categoryService.updateCategory(id, category);
+        if (status == 1) {
             return ResponseEntity.status(HttpStatus.OK).body(category);
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("New id is already in use."));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Category not found."));
         }
