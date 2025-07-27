@@ -47,10 +47,11 @@ public class UserService {
 
     public Boolean deleteUser(String id) {
         // Look for the user and delete it if found
-        for (User user : users) {
-            if (user.getId().equals(id))
-                users.remove(user);
-            return true;
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getId().equals(id)) {
+                users.remove(i);
+                return true;
+            }
         }
         // if not found, return false
         return false;

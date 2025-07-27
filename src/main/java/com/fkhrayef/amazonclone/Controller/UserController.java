@@ -43,7 +43,7 @@ public class UserController {
 
         // add user
         if (userService.addUser(user)) {
-            return ResponseEntity.status(HttpStatus.OK).body(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("ID is already in use."));
         }

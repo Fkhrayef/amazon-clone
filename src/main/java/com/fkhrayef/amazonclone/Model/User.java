@@ -10,7 +10,7 @@ public class User {
     @NotEmpty(message = "User id cannot be null")
     private String id;
     @NotEmpty(message = "User username cannot be null")
-    @Size(min = 4, message = "User username must be more than 5 character")
+    @Size(min = 6, message = "User username must be more than 5 character")
     private String username;
     @NotEmpty(message = "User password cannot be null")
     @Pattern(
@@ -25,5 +25,5 @@ public class User {
     private String role;
     @NotNull(message = "User balance cannot be null")
     @Positive(message = "User balance must be positive")
-    private String balance;
+    private Double balance;
 }
