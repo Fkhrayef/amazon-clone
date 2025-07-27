@@ -79,4 +79,23 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found!"));
         }
     }
+
+    @PostMapping("/buy-product/{userId}/{productId}/{merchantId}")
+    public ResponseEntity<?> buyProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId) {
+        Integer status = userService.buyProduct(userId, productId, merchantId);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Bought product successfully."));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found."));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Merchant not found."));
+        } else if (status == 4) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found."));
+        } else if (status == 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Product is out of stock."));
+        } else { // status == 6
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient funds."));
+        }
+    }
 }
