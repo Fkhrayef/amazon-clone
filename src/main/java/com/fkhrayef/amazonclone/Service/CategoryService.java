@@ -1,7 +1,6 @@
 package com.fkhrayef.amazonclone.Service;
 
 import com.fkhrayef.amazonclone.Model.Category;
-import com.fkhrayef.amazonclone.Model.Product;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
