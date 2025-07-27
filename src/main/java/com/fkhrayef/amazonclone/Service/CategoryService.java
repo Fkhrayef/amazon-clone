@@ -45,7 +45,7 @@ public class CategoryService {
     }
 
     public Boolean deleteCategory(String id) {
-        // Look for the category and update it if found
+        // Look for the category and delete it if found
         for (int i = 0; i < categories.size() ; i++) {
             if (categories.get(i).getId().equals(id)) {
                 categories.remove(i);
