@@ -86,4 +86,43 @@ public class MerchantStockService {
         }
         return false;
     }
+
+    public Integer addStock(String merchantId, String productId, Integer additionalStock) {
+        // Validate additional stock is positive
+        if (additionalStock <= 0) {
+            return 2; // Invalid stock amount
+        }
+
+        // Check if merchant exists
+        boolean merchantExists = false;
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantId)) {
+                merchantExists = true;
+                break;
+            }
+        }
+        if (!merchantExists) return 3; // Merchant not found
+
+        // Check if product exists
+        boolean productExists = false;
+        for (Product p : productService.getProducts()) {
+            if (p.getId().equals(productId)) {
+                productExists = true;
+                break;
+            }
+        }
+        if (!productExists) return 4; // Product not found
+
+        // Find and update the merchant stock
+        for (int i = 0; i < merchantStocks.size(); i++) {
+            if (merchantStocks.get(i).getProductId().equals(productId) &&
+                    merchantStocks.get(i).getMerchantId().equals(merchantId)) {
+
+                Integer currentStock = merchantStocks.get(i).getStock();
+                merchantStocks.get(i).setStock(currentStock + additionalStock);
+                return 1; // Success
+            }
+        }
+        return 5; // MerchantStock not found
+    }
 }

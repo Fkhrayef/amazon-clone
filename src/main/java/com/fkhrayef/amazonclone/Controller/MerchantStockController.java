@@ -89,4 +89,21 @@ public class MerchantStockController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("MerchantStock not found."));
         }
     }
+
+    @PutMapping("/add-stock/{productId}/{merchantId}/{amount}")
+    public ResponseEntity<?> addStock(@PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId, @PathVariable("amount") Integer amount) {
+        Integer status = merchantStockService.addStock(merchantId, productId, amount);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Added stock successfully."));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Added amount must be positive."));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Merchant not found."));
+        } else if (status == 4) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found."));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("MerchantStock not found."));
+        }
+    }
 }

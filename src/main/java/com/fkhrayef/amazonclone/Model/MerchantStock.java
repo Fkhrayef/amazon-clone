@@ -17,5 +17,5 @@ public class MerchantStock {
     private String merchantId;
     @NotNull(message = "MerchantStock stock cannot be null")
     @Positive(message = "MerchantStock stock must be positive")
-    private Double stock; // initially 10 (Logically implemented in service)
+    private Integer stock; // initially 10 (Logically implemented in service)
 }
