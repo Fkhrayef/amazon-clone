@@ -62,4 +62,13 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Category not found."));
         }
     }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") String id) {
+        if (categoryService.deleteCategory(id)) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Category not found."));
+        }
+    }
 }

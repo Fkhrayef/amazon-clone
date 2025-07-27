@@ -29,4 +29,16 @@ public class CategoryService {
         // if not found, return false
         return false;
     }
+
+    public Boolean deleteCategory(String id) {
+        // Look for the category and update it if found
+        for (int i = 0; i < categories.size() ; i++) {
+            if (categories.get(i).getId().equals(id)) {
+                categories.remove(i);
+                return true;
+            }
+        }
+        // if not found, return false
+        return false;
+    }
 }
