@@ -13,4 +13,8 @@ public class CategoryService {
     public ArrayList<Category> getCategories() {
         return categories;
     }
+
+    public void addCategory(Category category) {
+        categories.add(category);
+    }
 }
