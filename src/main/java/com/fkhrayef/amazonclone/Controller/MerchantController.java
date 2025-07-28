@@ -80,6 +80,15 @@ public class MerchantController {
         }
     }
 
+    // ===== EXTRA BUSINESS LOGIC ENDPOINT =====
+
+    /**
+     * EXTRA ENDPOINT #9: Merchant Rating & Ranking System
+     * Provides top-rated merchants based on dynamic performance scoring algorithm.
+     * Features: Real-time rating calculation, purchase/return impact weighting,
+     *          top 5 merchant ranking, performance-based merchant discovery.
+     * Scoring: +1 per purchase, -2 per return (incentivizes quality service)
+     */
     @GetMapping("/get/top-merchants")
     public ResponseEntity<?> getTopMerchants() {
         ArrayList<Merchant> topMerchants = merchantService.getTopMerchants();
