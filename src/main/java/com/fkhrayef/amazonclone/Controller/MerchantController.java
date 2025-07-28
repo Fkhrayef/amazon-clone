@@ -79,4 +79,15 @@ public class MerchantController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Merchant not found."));
         }
     }
+
+    @GetMapping("/get/top-merchants")
+    public ResponseEntity<?> getTopMerchants() {
+        ArrayList<Merchant> topMerchants = merchantService.getTopMerchants();
+
+        if (!topMerchants.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(topMerchants);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No merchants found."));
+        }
+    }
 }

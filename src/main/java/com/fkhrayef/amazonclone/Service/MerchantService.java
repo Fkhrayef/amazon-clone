@@ -4,6 +4,7 @@ import com.fkhrayef.amazonclone.Model.Merchant;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 @Service
 public class MerchantService {
@@ -19,6 +20,7 @@ public class MerchantService {
                 return false; // id already in use
             }
         }
+        merchant.setRating(0.0);
         merchants.add(merchant);
         return true; // added successfully
     }
@@ -52,5 +54,14 @@ public class MerchantService {
         }
         // if not found, return false
         return false;
+    }
+
+    public ArrayList<Merchant> getTopMerchants() {
+        ArrayList<Merchant> topMerchants = merchants;
+        topMerchants.sort(Comparator.comparingDouble(Merchant::getRating).reversed());
+
+        int count = Math.min(5, topMerchants.size()); // setting maximum suggested product size to 5.
+
+        return new ArrayList<>(topMerchants.subList(0, count));
     }
 }

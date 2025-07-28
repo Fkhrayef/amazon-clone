@@ -1,6 +1,7 @@
 package com.fkhrayef.amazonclone.Model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,4 +14,6 @@ public class Merchant {
     @NotEmpty(message = "Merchant name cannot be null")
     @Size(min = 4, message = "Merchant name must be more than 3 character")
     private String name;
+    @PositiveOrZero(message = "Merchant rating cannot be negative")
+    private Double rating;
 }

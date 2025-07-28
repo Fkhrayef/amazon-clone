@@ -30,4 +30,8 @@ public class User {
     @NotEmpty(message = "User country cannot be null")
     @Pattern(regexp = "^(Saudi Arabia|Kuwait)$", message = "Country must be either 'Saudi Arabia' or 'Kuwait'")
     private String country;
+    @PositiveOrZero(message = "Loyalty points cannot be negative")
+    private Integer loyaltyPoints;
+    @PositiveOrZero(message = "Total carbon footprint cannot be negative")
+    private Double totalCarbonFootprint; // Total kg CO2 from all purchases
 }

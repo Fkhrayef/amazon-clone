@@ -29,7 +29,8 @@ public class UserService {
                 return false; // id is not available
             }
         }
-        
+        user.setLoyaltyPoints(0);
+        user.setTotalCarbonFootprint(0.0);
         users.add(user);
         return true; // added successfully
     }
@@ -144,11 +145,24 @@ public class UserService {
         }
         // success
         merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
+        // statistics
+        // Add loyalty points:
+        int pointsEarned = (int) Math.floor(product.getPrice()); // 1 point per dollar spent
+        user.setLoyaltyPoints(user.getLoyaltyPoints() + pointsEarned);
+        // Country bought from:
         if (user.getCountry().equals("Saudi Arabia")) {
             product.setSaudiBuyCount(product.getSaudiBuyCount() + 1); // saudi bought the product
         } else {
             product.setKuwaitBuyCount(product.getKuwaitBuyCount() + 1); // kuwaiti bought the product
         }
+        // Merchant Rating
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantStock.getMerchantId())) {
+                m.setRating(m.getRating() + 1); // add 1 score for buys
+            }
+        }
+        // Add carbon footprint tracking:
+        user.setTotalCarbonFootprint(user.getTotalCarbonFootprint() + product.getCarbonFootprint());
         return 1; // Bought the product successfully
     }
 
@@ -202,6 +216,7 @@ public class UserService {
         // success
         merchantStock.setStock(merchantStock.getStock() + 1); // add stock
         user.setBalance(user.getBalance() + product.getPrice()); // refund balance
+        // statistics
         if (user.getCountry().equals("Saudi Arabia")) {
             // saudi refunded the product
             if (product.getSaudiBuyCount() > 0) {
@@ -212,6 +227,17 @@ public class UserService {
             if (product.getKuwaitBuyCount() > 0) {
                 product.setKuwaitBuyCount(product.getKuwaitBuyCount() - 1);
             }
+        }
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantStock.getMerchantId())) {
+                m.setRating(m.getRating() - 2); // subtract 2 scores for returns
+            }
+        }
+        // Reduce carbon footprint on return:
+        if (user.getTotalCarbonFootprint() >= product.getCarbonFootprint()) {
+            user.setTotalCarbonFootprint(user.getTotalCarbonFootprint() - product.getCarbonFootprint());
+        } else {
+            user.setTotalCarbonFootprint(0.0); // Prevent negative values
         }
         return 1; // Refunded the product successfully
     }
@@ -241,9 +267,7 @@ public class UserService {
 
         int count = Math.min(15, products.size()); // setting maximum suggested product size to 15.
 
-        ArrayList<Product> suggestedProducts = new ArrayList<>(products.subList(0, count));
-
-        return suggestedProducts;
+        return new ArrayList<>(products.subList(0, count));
     }
 
     public Integer addDiscount(String userId, String merchantStockId, String coupon) {
@@ -323,8 +347,9 @@ public class UserService {
                 "Gift Card $" + amount,          // name
                 amount,                          // price
                 "gift-cards",                    // categoryId
-                0,                              // saudiBuyCount
-                0                               // kuwaitBuyCount
+                0,                               // saudiBuyCount
+                0,                               // kuwaitBuyCount
+                0.0                              // kg CO2
         );
 
         // Add to products
@@ -364,5 +389,55 @@ public class UserService {
         user.setBalance(user.getBalance() + giftCard.getPrice());
         productService.deleteProduct(giftCardCode);
         return 1; // gift card redeemed successfully
+    }
+
+    public Integer spendPoints(String userId, Integer points) {
+        // Validate points amount (minimum 100 points = $1)
+        if (points < 100 || points % 100 != 0) {
+            return 2; // Invalid points amount (must be multiple of 100)
+        }
+
+        // Find user
+        boolean userExists = false;
+        User user = null;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+        if (!userExists) return 3; // User not found
+
+        // Check if user has enough points
+        if (user.getLoyaltyPoints() < points) {
+            return 4; // Insufficient points
+        }
+
+        // Convert points to balance (100 points = $1)
+        double balanceToAdd = points / 100.0;
+        user.setLoyaltyPoints(user.getLoyaltyPoints() - points);
+        user.setBalance(user.getBalance() + balanceToAdd);
+
+        return 1; // Success
+    }
+
+    // Extra: get user's carbon footprint
+    public Double getUserCarbonFootprint(String userId) {
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                return u.getTotalCarbonFootprint();
+            }
+        }
+        return null; // User not found
+    }
+
+    // Extra: get carbon footprint leaderboard (lowest first = most eco-friendly)
+    public ArrayList<User> getCarbonFootprintLeaderboard() {
+        ArrayList<User> leaderboard = new ArrayList<>(users);
+        leaderboard.sort(Comparator.comparingDouble(User::getTotalCarbonFootprint));
+
+        int count = Math.min(3, leaderboard.size()); // Top 3 eco-friendly users
+        return new ArrayList<>(leaderboard.subList(0, count));
     }
 }

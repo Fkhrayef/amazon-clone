@@ -188,4 +188,47 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid or already used gift card"));
         }
     }
+
+    // Extra: spend loyalty points
+    @PostMapping("/spend-points/{userId}/{points}")
+    public ResponseEntity<?> spendPoints(@PathVariable String userId, @PathVariable Integer points) {
+        Integer status = userService.spendPoints(userId, points);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Points redeemed successfully!"));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid points amount. Must be multiple of 100 (minimum 100)"));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found"));
+        } else { // status == 4
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient loyalty points"));
+        }
+    }
+
+    // Extra: get user's carbon footprint
+    @GetMapping("/get/carbon-footprint/{userId}")
+    public ResponseEntity<?> getUserCarbonFootprint(@PathVariable String userId) {
+        Double carbonFootprint = userService.getUserCarbonFootprint(userId);
+
+        if (carbonFootprint != null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse("Carbon footprint: " + carbonFootprint + " kg CO2"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("User not found"));
+        }
+    }
+
+    // Extra: get carbon footprint leaderboard
+    @GetMapping("/get/carbon-leaderboard")
+    public ResponseEntity<?> getCarbonFootprintLeaderboard() {
+        ArrayList<User> leaderboard = userService.getCarbonFootprintLeaderboard();
+
+        if (!leaderboard.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(leaderboard);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("No users found"));
+        }
+    }
 }
