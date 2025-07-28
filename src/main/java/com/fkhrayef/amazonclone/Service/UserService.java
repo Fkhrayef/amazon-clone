@@ -67,7 +67,7 @@ public class UserService {
         return false;
     }
 
-    public Integer buyProduct(String userId, String productId, String merchantId) {
+    public Integer buyProduct(String userId, String productId, String merchantId, String coupon) {
 
         // Check if user exists
         boolean userExists = false;
@@ -117,14 +117,35 @@ public class UserService {
         }
         if (!productInStock) return 5; // product is out of stock
 
-        // Check if user has sufficient funds
-        if (user.getBalance() < product.getPrice()) {
-            return 6; // insufficient funds
+        // check if user has a coupon
+        boolean couponStatus = false; // no coupon provided
+        if (coupon != null) {
+            if (!coupon.matches("^[a-zA-Z]{4}-\\d{1,2}$") || !coupon.equals(merchantStock.getCoupon())) {
+                return 7; // Invalid coupon
+            } else {
+                couponStatus = true;
+            }
         }
 
+        if (couponStatus) {
+            // get coupon discount amount
+            int discount = Integer.parseInt(coupon.substring(5));
+
+            // Check if user has sufficient funds
+            double discountedPrice = product.getPrice() * (1 - discount / 100.0);
+            if (user.getBalance() < discountedPrice) {
+                return 6; // insufficient funds
+            }
+            user.setBalance(user.getBalance() - discountedPrice); // reduce balance with discount
+        } else {
+            // Check if user has sufficient funds
+            if (user.getBalance() < product.getPrice()) {
+                return 6; // insufficient funds
+            }
+            user.setBalance(user.getBalance() - product.getPrice()); // reduce balance without discount
+        }
         // success
         merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
-        user.setBalance(user.getBalance() - product.getPrice()); // reduce balance
         if (user.getCountry().equals("Saudi Arabia")) {
             product.setSaudiBuyCount(product.getSaudiBuyCount() + 1); // saudi bought the product
         } else {
@@ -219,5 +240,33 @@ public class UserService {
         ArrayList<Product> suggestedProducts = new ArrayList<>(products.subList(0, count));
 
         return suggestedProducts;
+    }
+
+    public Integer addDiscount(String userId, String merchantStockId, String coupon) {
+        // check if user exists and his permissions
+        int userState = 3; // user not found
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                if (u.getRole().equals("Admin")) {
+                    userState = 1; // user found and has permissions
+                    break;
+                } else {
+                    userState = 2; // user doesn't have permissions
+                }
+            }
+        }
+        if (userState == 3) {
+            return 3; // user not found
+        } else if (userState == 2) {
+            return 2; // user doesn't have permissions
+        } else {
+            for (MerchantStock m : merchantStockService.getMerchantStocks()) {
+                if (m.getId().equals(merchantStockId)) {
+                    m.setCoupon(coupon);
+                    return 1; // user found and has permissions
+                }
+            }
+            return 4; // MerchantStock not found
+        }
     }
 }
