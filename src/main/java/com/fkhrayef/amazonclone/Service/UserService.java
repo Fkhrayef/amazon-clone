@@ -205,9 +205,15 @@ public class UserService {
         merchantStock.setStock(merchantStock.getStock() + 1); // add stock
         user.setBalance(user.getBalance() + product.getPrice()); // refund balance
         if (user.getCountry().equals("Saudi Arabia")) {
-            product.setSaudiBuyCount(product.getSaudiBuyCount() - 1); // saudi refunded the product
+            // saudi refunded the product
+            if (product.getSaudiBuyCount() > 0) {
+                product.setSaudiBuyCount(product.getSaudiBuyCount() - 1);
+            }
         } else {
-            product.setKuwaitBuyCount(product.getKuwaitBuyCount() - 1); // kuwaiti refunded the product
+            // kuwaiti refunded the product
+            if (product.getKuwaitBuyCount() > 0) {
+                product.setKuwaitBuyCount(product.getKuwaitBuyCount() - 1);
+            }
         }
         return 1; // Refunded the product successfully
     }

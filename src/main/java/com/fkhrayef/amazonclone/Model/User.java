@@ -28,6 +28,6 @@ public class User {
     private Double balance;
     // extra
     @NotEmpty(message = "User country cannot be null")
-    @Pattern(regexp = "^(Saudi Arabia|Kuwait)$")
+    @Pattern(regexp = "^(Saudi Arabia|Kuwait)$", message = "Country must be either 'Saudi Arabia' or 'Kuwait'")
     private String country;
 }
