@@ -26,4 +26,8 @@ public class User {
     @NotNull(message = "User balance cannot be null")
     @Positive(message = "User balance must be positive")
     private Double balance;
+    // extra
+    @NotEmpty(message = "User country cannot be null")
+    @Pattern(regexp = "^(Saudi Arabia|Kuwait)$")
+    private String country;
 }

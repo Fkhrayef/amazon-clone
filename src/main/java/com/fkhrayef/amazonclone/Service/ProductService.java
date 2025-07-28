@@ -28,6 +28,8 @@ public class ProductService {
 
         for (Category c : categoryService.getCategories()) {
             if (c.getId().equals(product.getCategoryId())) {
+                product.setSaudiBuyCount(0);
+                product.setKuwaitBuyCount(0);
                 products.add(product);
                 return 1; // added successfully
             }

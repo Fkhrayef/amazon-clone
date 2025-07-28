@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -122,8 +124,42 @@ public class UserService {
         }
 
         // success
-        merchantStock.setStock(merchantStock.getStock() - 1);
-        user.setBalance(user.getBalance() - product.getPrice());
+        merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
+        user.setBalance(user.getBalance() - product.getPrice()); // reduce balance
+        if (user.getCountry().equals("Saudi Arabia")) {
+            product.setSaudiBuyCount(product.getSaudiBuyCount() + 1); // saudi bought the product
+        } else {
+            product.setKuwaitBuyCount(product.getKuwaitBuyCount() + 1); // kuwaiti bought the product
+        }
         return 1; // Bought the product successfully
+    }
+
+    public ArrayList<Product> getSuggestedProducts(String userId) {
+        ArrayList<Product> products = productService.getProducts();
+
+        // get user
+        User user = null;
+        boolean userExists = false;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+
+        if (!userExists) return null; // user doesn't exist
+
+        if (user.getCountry().equals("Saudi Arabia")) {
+            products.sort(Comparator.comparingInt(Product::getSaudiBuyCount).reversed());
+        } else {
+            products.sort(Comparator.comparingInt(Product::getKuwaitBuyCount).reversed());
+        }
+
+        int count = Math.min(15, products.size()); // setting maximum suggested product size to 15.
+
+        ArrayList<Product> suggestedProducts = new ArrayList<>(products.subList(0, count));
+
+        return suggestedProducts;
     }
 }

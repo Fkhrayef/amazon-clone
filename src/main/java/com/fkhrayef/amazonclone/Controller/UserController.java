@@ -1,6 +1,7 @@
 package com.fkhrayef.amazonclone.Controller;
 
 import com.fkhrayef.amazonclone.Api.ApiResponse;
+import com.fkhrayef.amazonclone.Model.Product;
 import com.fkhrayef.amazonclone.Model.User;
 import com.fkhrayef.amazonclone.Service.UserService;
 import jakarta.validation.Valid;
@@ -96,6 +97,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Product is out of stock."));
         } else { // status == 6
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient funds."));
+        }
+    }
+
+    // Extra: suggested items based on user country
+    @GetMapping("/get/suggested-products/{userId}")
+    public ResponseEntity<?> getSuggestedProducts(@PathVariable("userId") String userId) {
+        ArrayList<Product> suggestedProducts = userService.getSuggestedProducts(userId);
+
+        if (suggestedProducts == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("User ID not found."));
+        }
+
+        if (!suggestedProducts.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(suggestedProducts);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No suggested products."));
         }
     }
 }
