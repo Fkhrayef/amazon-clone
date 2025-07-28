@@ -174,4 +174,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient balance"));
         }
     }
+
+    // Extra: redeem gift card
+    @PostMapping("/redeem-gift-card/{userId}/{giftCardCode}")
+    public ResponseEntity<?> redeemGiftCard(@PathVariable String userId, @PathVariable String giftCardCode) {
+        Integer status = userService.redeemGiftCard(userId, giftCardCode);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Gift card redeemed successfully!"));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found"));
+        } else { // status == 3
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid or already used gift card"));
+        }
+    }
 }

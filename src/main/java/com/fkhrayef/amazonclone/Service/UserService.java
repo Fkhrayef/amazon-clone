@@ -305,6 +305,7 @@ public class UserService {
         for (Category c : categoryService.getCategories()) {
             if (c.getId().equals("gift-cards")) {
                 categoryExist = true;
+                break;
             }
         }
 
@@ -331,5 +332,37 @@ public class UserService {
 
         // Return gift card code
         return giftCardCode;
+    }
+
+    // Extra: redeem gift card
+    public Integer redeemGiftCard(String userId, String giftCardCode) {
+        // Validate user exists
+        boolean userExists = false;
+        User user = null;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+        if (!userExists) return 2; // user not found
+
+        // Find gift card
+        boolean giftCardExists = false;
+        Product giftCard = null;
+        for (Product p: productService.getProducts()) {
+            if (p.getId().equals(giftCardCode) && p.getCategoryId().equals("gift-cards")) {
+                giftCardExists = true;
+                giftCard = p;
+                break;
+            }
+        }
+        if (!giftCardExists) return 3; // invalid gift card
+
+        // success
+        user.setBalance(user.getBalance() + giftCard.getPrice());
+        productService.deleteProduct(giftCardCode);
+        return 1; // gift card redeemed successfully
     }
 }
