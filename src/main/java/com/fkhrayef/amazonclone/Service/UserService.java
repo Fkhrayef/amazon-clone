@@ -146,6 +146,8 @@ public class UserService {
         // success
         merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
         // statistics
+        // Track purchase as view
+        product.setViewCount(product.getViewCount() + 1);
         // Add loyalty points:
         int pointsEarned = (int) Math.floor(product.getPrice()); // 1 point per dollar spent
         user.setLoyaltyPoints(user.getLoyaltyPoints() + pointsEarned);
@@ -259,14 +261,24 @@ public class UserService {
 
         if (!userExists) return null; // user doesn't exist
 
+        // Sort by priority: Buys (most important) → Views → Eco-friendliness (least important)
         if (user.getCountry().equals("Saudi Arabia")) {
-            products.sort(Comparator.comparingInt(Product::getSaudiBuyCount).reversed());
+            products.sort((p1, p2) -> {
+                // Priority scoring: Buys × 10 + Views × 2 + Eco bonus
+                int score1 = (p1.getSaudiBuyCount() * 10) + (p1.getViewCount() * 2) + (int)(10 - p1.getCarbonFootprint());
+                int score2 = (p2.getSaudiBuyCount() * 10) + (p2.getViewCount() * 2) + (int)(10 - p2.getCarbonFootprint());
+                return Integer.compare(score2, score1); // Higher score first
+            });
         } else {
-            products.sort(Comparator.comparingInt(Product::getKuwaitBuyCount).reversed());
+            products.sort((p1, p2) -> {
+                // Priority scoring: Buys × 10 + Views × 2 + Eco bonus
+                int score1 = (p1.getKuwaitBuyCount() * 10) + (p1.getViewCount() * 2) + (int)(10 - p1.getCarbonFootprint());
+                int score2 = (p2.getKuwaitBuyCount() * 10) + (p2.getViewCount() * 2) + (int)(10 - p2.getCarbonFootprint());
+                return Integer.compare(score2, score1); // Higher score first
+            });
         }
 
         int count = Math.min(15, products.size()); // setting maximum suggested product size to 15.
-
         return new ArrayList<>(products.subList(0, count));
     }
 
@@ -349,7 +361,8 @@ public class UserService {
                 "gift-cards",                    // categoryId
                 0,                               // saudiBuyCount
                 0,                               // kuwaitBuyCount
-                0.0                              // kg CO2
+                0,                               // viewCount
+                0.0                              // carbonFootprint
         );
 
         // Add to products

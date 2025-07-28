@@ -18,6 +18,16 @@ public class ProductService {
         return products;
     }
 
+    public Product getProductById(String productId) {
+        for (Product p : products) {
+            if (p.getId().equals(productId)) {
+                p.setViewCount(p.getViewCount() + 1); // add view to the product
+                return p; // return the product
+            }
+        }
+        return null; // Product not found
+    }
+
     public Integer addProduct(Product product) {
         // check if id is available
         for (Product p : products) {
@@ -30,6 +40,7 @@ public class ProductService {
             if (c.getId().equals(product.getCategoryId())) {
                 product.setSaudiBuyCount(0);
                 product.setKuwaitBuyCount(0);
+                product.setViewCount(0);
                 products.add(product);
                 return 1; // added successfully
             }
