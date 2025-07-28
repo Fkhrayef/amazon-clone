@@ -1,9 +1,6 @@
 package com.fkhrayef.amazonclone.Model;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -20,4 +17,9 @@ public class Product {
     private Double price;
     @NotEmpty(message = "Product must have a category id")
     private String categoryId;
+    //extra
+    @PositiveOrZero
+    private Integer saudiBuyCount;
+    @PositiveOrZero
+    private Integer kuwaitBuyCount;
 }

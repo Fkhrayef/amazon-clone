@@ -1,6 +1,7 @@
 package com.fkhrayef.amazonclone.Controller;
 
 import com.fkhrayef.amazonclone.Api.ApiResponse;
+import com.fkhrayef.amazonclone.Model.Product;
 import com.fkhrayef.amazonclone.Model.User;
 import com.fkhrayef.amazonclone.Service.UserService;
 import jakarta.validation.Valid;
@@ -81,8 +82,8 @@ public class UserController {
     }
 
     @PostMapping("/buy-product/{userId}/{productId}/{merchantId}")
-    public ResponseEntity<?> buyProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId) {
-        Integer status = userService.buyProduct(userId, productId, merchantId);
+    public ResponseEntity<?> buyProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId, @RequestParam(required = false, name = "coupon") String coupon) {
+        Integer status = userService.buyProduct(userId, productId, merchantId, coupon);
 
         if (status == 1) {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Bought product successfully."));
@@ -94,8 +95,97 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found."));
         } else if (status == 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Product is out of stock."));
-        } else { // status == 6
+        } else if (status == 6){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient funds."));
+        } else { // status == 7
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid Coupon."));
+        }
+    }
+
+    // Extra: Refund a product
+    @PostMapping("/refund-product/{userId}/{productId}/{merchantId}")
+    public ResponseEntity<?> refundProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId) {
+        Integer status = userService.refundProduct(userId, productId, merchantId);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Refunded product successfully."));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found."));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Merchant not found."));
+        } else if (status == 4) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found."));
+        } else { // status == 5
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("MerchantStock not found."));
+        }
+    }
+
+    // Extra: suggested items based on user country
+    @GetMapping("/get/suggested-products/{userId}")
+    public ResponseEntity<?> getSuggestedProducts(@PathVariable("userId") String userId) {
+        ArrayList<Product> suggestedProducts = userService.getSuggestedProducts(userId);
+
+        if (suggestedProducts == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("User ID not found."));
+        }
+
+        if (!suggestedProducts.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(suggestedProducts);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("No suggested products."));
+        }
+    }
+
+    // Extra: allows admin to add discount to products
+    @PostMapping("/add-discount/{userId}/{merchantStockId}")
+    public ResponseEntity<?> addDiscount(@PathVariable("userId") String userId, @PathVariable("merchantStockId") String merchantStockId, @RequestParam("coupon") String coupon) {
+        // validate coupon format
+        if (!coupon.matches("^[a-zA-Z]{4}-\\d{1,2}$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Coupon is invalid."));
+        }
+
+        // add coupon
+        int status = userService.addDiscount(userId, merchantStockId, coupon);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Coupon added successfully."));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse("User is not Admin."));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found."));
+        } else { // status == 4
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("MerchantStock not found."));
+        }
+    }
+
+    // Extra: buy gift cards
+    @PostMapping("/buy-gift-card/{userId}/{amount}")
+    public ResponseEntity<?> buyGiftCard(@PathVariable("userId") String userId, @PathVariable("amount") Double amount) {
+        String response = userService.buyGiftCard(userId, amount);
+
+        if (response.startsWith("GC")) {
+            // Success - response is the gift card code
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Gift card purchased successfully. Code: " + response));
+        } else if (response.equals("2")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid amount. Choose: 10, 20, 50, 80, or 100"));
+        } else if (response.equals("3")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found"));
+        } else { // "4"
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient balance"));
+        }
+    }
+
+    // Extra: redeem gift card
+    @PostMapping("/redeem-gift-card/{userId}/{giftCardCode}")
+    public ResponseEntity<?> redeemGiftCard(@PathVariable String userId, @PathVariable String giftCardCode) {
+        Integer status = userService.redeemGiftCard(userId, giftCardCode);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Gift card redeemed successfully!"));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found"));
+        } else { // status == 3
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid or already used gift card"));
         }
     }
 }
