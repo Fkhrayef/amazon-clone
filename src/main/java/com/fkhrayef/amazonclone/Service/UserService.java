@@ -30,6 +30,7 @@ public class UserService {
             }
         }
         user.setLoyaltyPoints(0);
+        user.setTotalCarbonFootprint(0.0);
         users.add(user);
         return true; // added successfully
     }
@@ -160,6 +161,8 @@ public class UserService {
                 m.setRating(m.getRating() + 1); // add 1 score for buys
             }
         }
+        // Add carbon footprint tracking:
+        user.setTotalCarbonFootprint(user.getTotalCarbonFootprint() + product.getCarbonFootprint());
         return 1; // Bought the product successfully
     }
 
@@ -229,6 +232,12 @@ public class UserService {
             if (m.getId().equals(merchantStock.getMerchantId())) {
                 m.setRating(m.getRating() - 2); // subtract 2 scores for returns
             }
+        }
+        // Reduce carbon footprint on return:
+        if (user.getTotalCarbonFootprint() >= product.getCarbonFootprint()) {
+            user.setTotalCarbonFootprint(user.getTotalCarbonFootprint() - product.getCarbonFootprint());
+        } else {
+            user.setTotalCarbonFootprint(0.0); // Prevent negative values
         }
         return 1; // Refunded the product successfully
     }
@@ -338,8 +347,9 @@ public class UserService {
                 "Gift Card $" + amount,          // name
                 amount,                          // price
                 "gift-cards",                    // categoryId
-                0,                              // saudiBuyCount
-                0                               // kuwaitBuyCount
+                0,                               // saudiBuyCount
+                0,                               // kuwaitBuyCount
+                0.0                              // kg CO2
         );
 
         // Add to products
@@ -410,5 +420,24 @@ public class UserService {
         user.setBalance(user.getBalance() + balanceToAdd);
 
         return 1; // Success
+    }
+
+    // Extra: get user's carbon footprint
+    public Double getUserCarbonFootprint(String userId) {
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                return u.getTotalCarbonFootprint();
+            }
+        }
+        return null; // User not found
+    }
+
+    // Extra: get carbon footprint leaderboard (lowest first = most eco-friendly)
+    public ArrayList<User> getCarbonFootprintLeaderboard() {
+        ArrayList<User> leaderboard = new ArrayList<>(users);
+        leaderboard.sort(Comparator.comparingDouble(User::getTotalCarbonFootprint));
+
+        int count = Math.min(3, leaderboard.size()); // Top 3 eco-friendly users
+        return new ArrayList<>(leaderboard.subList(0, count));
     }
 }

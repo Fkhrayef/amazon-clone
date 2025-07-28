@@ -22,4 +22,7 @@ public class Product {
     private Integer saudiBuyCount;
     @PositiveOrZero
     private Integer kuwaitBuyCount;
+    @NotNull(message = "Product carbon footprint cannot be null")
+    @PositiveOrZero(message = "Carbon footprint cannot be negative")
+    private Double carbonFootprint; // kg CO2 per product
 }

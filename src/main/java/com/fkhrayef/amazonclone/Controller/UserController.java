@@ -204,4 +204,31 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient loyalty points"));
         }
     }
+
+    // Extra: get user's carbon footprint
+    @GetMapping("/get/carbon-footprint/{userId}")
+    public ResponseEntity<?> getUserCarbonFootprint(@PathVariable String userId) {
+        Double carbonFootprint = userService.getUserCarbonFootprint(userId);
+
+        if (carbonFootprint != null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse("Carbon footprint: " + carbonFootprint + " kg CO2"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("User not found"));
+        }
+    }
+
+    // Extra: get carbon footprint leaderboard
+    @GetMapping("/get/carbon-leaderboard")
+    public ResponseEntity<?> getCarbonFootprintLeaderboard() {
+        ArrayList<User> leaderboard = userService.getCarbonFootprintLeaderboard();
+
+        if (!leaderboard.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(leaderboard);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse("No users found"));
+        }
+    }
 }

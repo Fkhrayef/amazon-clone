@@ -32,4 +32,6 @@ public class User {
     private String country;
     @PositiveOrZero(message = "Loyalty points cannot be negative")
     private Integer loyaltyPoints;
+    @PositiveOrZero(message = "Total carbon footprint cannot be negative")
+    private Double totalCarbonFootprint; // Total kg CO2 from all purchases
 }
