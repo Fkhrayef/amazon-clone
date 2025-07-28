@@ -144,10 +144,16 @@ public class UserService {
         }
         // success
         merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
+        // statistics
         if (user.getCountry().equals("Saudi Arabia")) {
             product.setSaudiBuyCount(product.getSaudiBuyCount() + 1); // saudi bought the product
         } else {
             product.setKuwaitBuyCount(product.getKuwaitBuyCount() + 1); // kuwaiti bought the product
+        }
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantStock.getMerchantId())) {
+                m.setRating(m.getRating() + 1); // add 1 score for buys
+            }
         }
         return 1; // Bought the product successfully
     }
@@ -202,6 +208,7 @@ public class UserService {
         // success
         merchantStock.setStock(merchantStock.getStock() + 1); // add stock
         user.setBalance(user.getBalance() + product.getPrice()); // refund balance
+        // statistics
         if (user.getCountry().equals("Saudi Arabia")) {
             // saudi refunded the product
             if (product.getSaudiBuyCount() > 0) {
@@ -211,6 +218,11 @@ public class UserService {
             // kuwaiti refunded the product
             if (product.getKuwaitBuyCount() > 0) {
                 product.setKuwaitBuyCount(product.getKuwaitBuyCount() - 1);
+            }
+        }
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantStock.getMerchantId())) {
+                m.setRating(m.getRating() - 2); // subtract 2 scores for returns
             }
         }
         return 1; // Refunded the product successfully
