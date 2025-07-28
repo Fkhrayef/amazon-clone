@@ -100,6 +100,24 @@ public class UserController {
         }
     }
 
+    // Extra: Refund a product
+    @PostMapping("/refund-product/{userId}/{productId}/{merchantId}")
+    public ResponseEntity<?> refundProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId) {
+        Integer status = userService.refundProduct(userId, productId, merchantId);
+
+        if (status == 1) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Refunded product successfully."));
+        } else if (status == 2) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found."));
+        } else if (status == 3) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Merchant not found."));
+        } else if (status == 4) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found."));
+        } else { // status == 5
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("MerchantStock not found."));
+        }
+    }
+
     // Extra: suggested items based on user country
     @GetMapping("/get/suggested-products/{userId}")
     public ResponseEntity<?> getSuggestedProducts(@PathVariable("userId") String userId) {

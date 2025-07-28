@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 @Service
@@ -82,7 +81,7 @@ public class UserService {
         }
         if (!userExists) return 2; // User not found
 
-        // Check if merchant exists + is in stock
+        // Check if merchant exists
         boolean merchantExists = false;
         for (Merchant m : merchantService.getMerchants()) {
             if (m.getId().equals(merchantId)) {
@@ -134,6 +133,65 @@ public class UserService {
         return 1; // Bought the product successfully
     }
 
+    // Extra: Refund a product
+    public Integer refundProduct(String userId, String productId, String merchantId) {
+
+        // Check if user exists
+        boolean userExists = false;
+        User user = null; // to use later (saves us a for loop of O(n))
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+        if (!userExists) return 2; // User not found
+
+        // Check if merchant exists
+        boolean merchantExists = false;
+        for (Merchant m : merchantService.getMerchants()) {
+            if (m.getId().equals(merchantId)) {
+                merchantExists = true;
+                break;
+            }
+        }
+        if (!merchantExists) return 3; // Merchant not found
+
+        // Check if product exists
+        boolean productExists = false;
+        Product product = null; // to use later (saves us a for loop of O(n))
+        for (Product p : productService.getProducts()) {
+            if (p.getId().equals(productId)) {
+                productExists = true;
+                product = p;
+                break;
+            }
+        }
+        if (!productExists) return 4; // Product not found
+
+        // Get Merchant Stock
+        MerchantStock merchantStock = null;
+        for (MerchantStock m : merchantStockService.getMerchantStocks()) {
+            if (m.getProductId().equals(productId) && m.getMerchantId().equals(merchantId)) {
+                merchantStock = m;
+                break;
+            }
+        }
+        if (merchantStock == null) return 5; // MerchantStock not found
+
+        // success
+        merchantStock.setStock(merchantStock.getStock() + 1); // add stock
+        user.setBalance(user.getBalance() + product.getPrice()); // refund balance
+        if (user.getCountry().equals("Saudi Arabia")) {
+            product.setSaudiBuyCount(product.getSaudiBuyCount() - 1); // saudi refunded the product
+        } else {
+            product.setKuwaitBuyCount(product.getKuwaitBuyCount() - 1); // kuwaiti refunded the product
+        }
+        return 1; // Refunded the product successfully
+    }
+
+    // Extra: suggested items based on user country
     public ArrayList<Product> getSuggestedProducts(String userId) {
         ArrayList<Product> products = productService.getProducts();
 
