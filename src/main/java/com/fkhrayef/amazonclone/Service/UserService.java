@@ -253,9 +253,7 @@ public class UserService {
 
         int count = Math.min(15, products.size()); // setting maximum suggested product size to 15.
 
-        ArrayList<Product> suggestedProducts = new ArrayList<>(products.subList(0, count));
-
-        return suggestedProducts;
+        return new ArrayList<>(products.subList(0, count));
     }
 
     public Integer addDiscount(String userId, String merchantStockId, String coupon) {
