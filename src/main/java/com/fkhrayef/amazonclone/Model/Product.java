@@ -18,10 +18,12 @@ public class Product {
     @NotEmpty(message = "Product must have a category id")
     private String categoryId;
     //extra
-    @PositiveOrZero
+    @PositiveOrZero(message = "Saudi buy count cannot be negative")
     private Integer saudiBuyCount;
-    @PositiveOrZero
+    @PositiveOrZero(message = "Kuwait buy count cannot be negative")
     private Integer kuwaitBuyCount;
+    @PositiveOrZero(message = "View count cannot be negative")
+    private Integer viewCount;
     @NotNull(message = "Product carbon footprint cannot be null")
     @PositiveOrZero(message = "Carbon footprint cannot be negative")
     private Double carbonFootprint; // kg CO2 per product

@@ -30,6 +30,17 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/get/{productId}")
+    public ResponseEntity<?> viewProduct(@PathVariable String productId) {
+        Product product = productService.getProductById(productId);
+
+        if (product != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(product);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Product not found"));
+        }
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addProduct(@Valid @RequestBody Product product, Errors errors) {
         // Check for validation errors
