@@ -29,7 +29,7 @@ public class UserService {
                 return false; // id is not available
             }
         }
-        
+        user.setLoyaltyPoints(0);
         users.add(user);
         return true; // added successfully
     }
@@ -145,11 +145,16 @@ public class UserService {
         // success
         merchantStock.setStock(merchantStock.getStock() - 1); // reduce stock
         // statistics
+        // Add loyalty points:
+        int pointsEarned = (int) Math.floor(product.getPrice()); // 1 point per dollar spent
+        user.setLoyaltyPoints(user.getLoyaltyPoints() + pointsEarned);
+        // Country bought from:
         if (user.getCountry().equals("Saudi Arabia")) {
             product.setSaudiBuyCount(product.getSaudiBuyCount() + 1); // saudi bought the product
         } else {
             product.setKuwaitBuyCount(product.getKuwaitBuyCount() + 1); // kuwaiti bought the product
         }
+        // Merchant Rating
         for (Merchant m : merchantService.getMerchants()) {
             if (m.getId().equals(merchantStock.getMerchantId())) {
                 m.setRating(m.getRating() + 1); // add 1 score for buys
@@ -374,5 +379,36 @@ public class UserService {
         user.setBalance(user.getBalance() + giftCard.getPrice());
         productService.deleteProduct(giftCardCode);
         return 1; // gift card redeemed successfully
+    }
+
+    public Integer spendPoints(String userId, Integer points) {
+        // Validate points amount (minimum 100 points = $1)
+        if (points < 100 || points % 100 != 0) {
+            return 2; // Invalid points amount (must be multiple of 100)
+        }
+
+        // Find user
+        boolean userExists = false;
+        User user = null;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+        if (!userExists) return 3; // User not found
+
+        // Check if user has enough points
+        if (user.getLoyaltyPoints() < points) {
+            return 4; // Insufficient points
+        }
+
+        // Convert points to balance (100 points = $1)
+        double balanceToAdd = points / 100.0;
+        user.setLoyaltyPoints(user.getLoyaltyPoints() - points);
+        user.setBalance(user.getBalance() + balanceToAdd);
+
+        return 1; // Success
     }
 }

@@ -20,6 +20,7 @@ public class MerchantService {
                 return false; // id already in use
             }
         }
+        merchant.setRating(0.0);
         merchants.add(merchant);
         return true; // added successfully
     }
