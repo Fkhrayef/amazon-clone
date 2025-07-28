@@ -102,7 +102,14 @@ public class UserController {
         }
     }
 
-    // Extra: Refund a product
+    // ===== EXTRA BUSINESS LOGIC ENDPOINTS =====
+
+    /**
+     * EXTRA ENDPOINT #1: Product Refund System
+     * Allows customers to return purchased products and receive full refunds.
+     * Features: Balance restoration, stock replenishment, merchant rating impact, 
+     *          carbon footprint reduction. (Loyalty points are preserved for customer satisfaction)
+     */
     @PostMapping("/refund-product/{userId}/{productId}/{merchantId}")
     public ResponseEntity<?> refundProduct(@PathVariable("userId") String userId, @PathVariable("productId") String productId, @PathVariable("merchantId") String merchantId) {
         Integer status = userService.refundProduct(userId, productId, merchantId);
@@ -120,7 +127,12 @@ public class UserController {
         }
     }
 
-    // Extra: suggested items based on user country
+    /**
+     * EXTRA ENDPOINT #2: Smart Product Recommendation System
+     * Provides personalized product suggestions based on country-specific popularity,
+     * product views, and environmental impact scoring with weighted algorithms.
+     * Features: Multi-factor scoring, country-based preferences, eco-conscious recommendations.
+     */
     @GetMapping("/get/suggested-products/{userId}")
     public ResponseEntity<?> getSuggestedProducts(@PathVariable("userId") String userId) {
         ArrayList<Product> suggestedProducts = userService.getSuggestedProducts(userId);
@@ -136,7 +148,12 @@ public class UserController {
         }
     }
 
-    // Extra: allows admin to add discount to products
+    /**
+     * EXTRA ENDPOINT #3: Admin Discount Management System
+     * Enables administrators to create and assign discount coupons to specific merchant stock.
+     * Features: Role-based access control, coupon format validation, percentage-based discounts.
+     * Coupon Format: [4 letters]-[1-2 digits] (e.g., SAVE-25 for 25% off)
+     */
     @PostMapping("/add-discount/{userId}/{merchantStockId}")
     public ResponseEntity<?> addDiscount(@PathVariable("userId") String userId, @PathVariable("merchantStockId") String merchantStockId, @RequestParam("coupon") String coupon) {
         // validate coupon format
@@ -158,7 +175,13 @@ public class UserController {
         }
     }
 
-    // Extra: buy gift cards
+    /**
+     * EXTRA ENDPOINT #4: Gift Card Purchase System
+     * Allows users to purchase digital gift cards in predefined denominations.
+     * Features: Fixed amount validation, balance deduction, unique code generation,
+     *          automatic gift card product creation with timestamp-based IDs.
+     * Available amounts: $10, $20, $50, $80, $100
+     */
     @PostMapping("/buy-gift-card/{userId}/{amount}")
     public ResponseEntity<?> buyGiftCard(@PathVariable("userId") String userId, @PathVariable("amount") Double amount) {
         String response = userService.buyGiftCard(userId, amount);
@@ -175,7 +198,12 @@ public class UserController {
         }
     }
 
-    // Extra: redeem gift card
+    /**
+     * EXTRA ENDPOINT #5: Gift Card Redemption System
+     * Enables users to redeem gift card codes and add value to their account balance.
+     * Features: Gift card validation, balance addition, automatic product cleanup,
+     *          one-time use enforcement to prevent fraud.
+     */
     @PostMapping("/redeem-gift-card/{userId}/{giftCardCode}")
     public ResponseEntity<?> redeemGiftCard(@PathVariable String userId, @PathVariable String giftCardCode) {
         Integer status = userService.redeemGiftCard(userId, giftCardCode);
@@ -189,7 +217,13 @@ public class UserController {
         }
     }
 
-    // Extra: spend loyalty points
+    /**
+     * EXTRA ENDPOINT #6: Loyalty Points Redemption System
+     * Allows customers to convert earned loyalty points into account balance.
+     * Features: Points validation (minimum 100, multiples of 100), 1% reward rate,
+     *          balance conversion (100 points = $1), point deduction tracking.
+     * Earning: 1 point per $1 spent | Redemption: 100 points = $1 balance
+     */
     @PostMapping("/spend-points/{userId}/{points}")
     public ResponseEntity<?> spendPoints(@PathVariable String userId, @PathVariable Integer points) {
         Integer status = userService.spendPoints(userId, points);
@@ -205,7 +239,13 @@ public class UserController {
         }
     }
 
-    // Extra: get user's carbon footprint
+    /**
+     * EXTRA ENDPOINT #7: Personal Carbon Footprint Tracker
+     * Provides users with their total environmental impact from all purchases.
+     * Features: Real-time carbon tracking, cumulative footprint calculation,
+     *          environmental awareness promotion, refund impact consideration.
+     * Measurement: kg CO2 equivalent from all purchased products
+     */
     @GetMapping("/get/carbon-footprint/{userId}")
     public ResponseEntity<?> getUserCarbonFootprint(@PathVariable String userId) {
         Double carbonFootprint = userService.getUserCarbonFootprint(userId);
@@ -219,7 +259,13 @@ public class UserController {
         }
     }
 
-    // Extra: get carbon footprint leaderboard
+    /**
+     * EXTRA ENDPOINT #8: Carbon Footprint Leaderboard
+     * Displays top 3 most eco-conscious users with lowest carbon footprints.
+     * Features: Environmental ranking system, sustainability gamification,
+     *          community awareness building, eco-friendly behavior incentivization.
+     * Ranking: Users sorted by lowest total carbon footprint (most eco-friendly first)
+     */
     @GetMapping("/get/carbon-leaderboard")
     public ResponseEntity<?> getCarbonFootprintLeaderboard() {
         ArrayList<User> leaderboard = userService.getCarbonFootprintLeaderboard();
