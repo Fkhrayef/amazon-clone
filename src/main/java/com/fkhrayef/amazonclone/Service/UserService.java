@@ -1,9 +1,6 @@
 package com.fkhrayef.amazonclone.Service;
 
-import com.fkhrayef.amazonclone.Model.Merchant;
-import com.fkhrayef.amazonclone.Model.MerchantStock;
-import com.fkhrayef.amazonclone.Model.Product;
-import com.fkhrayef.amazonclone.Model.User;
+import com.fkhrayef.amazonclone.Model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +11,7 @@ import java.util.Comparator;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final CategoryService categoryService;
     private final ProductService productService;
     private final MerchantService merchantService;
     private final MerchantStockService merchantStockService;
@@ -274,5 +272,64 @@ public class UserService {
             }
             return 4; // MerchantStock not found
         }
+    }
+
+    // Extra: allows users to buy gift cards
+    public String buyGiftCard(String userId, Double amount) {
+        if (amount != 10 && amount != 20 && amount != 50 && amount != 80 && amount != 100) {
+            return "2"; // invalid gift card amount
+        }
+
+        boolean userExists = false;
+        User user = null;
+        for (User u : users) {
+            if (u.getId().equals(userId)) {
+                userExists = true;
+                user = u;
+                break;
+            }
+        }
+
+        if (!userExists) return "3"; // user not found
+
+        if (user.getBalance() < amount) {
+            return "4"; // insufficient amount
+        }
+
+        // Deduct the gift card amount from user's balance
+        user.setBalance(user.getBalance() - amount);
+
+        // check if category is created
+        boolean categoryExist = false;
+
+        for (Category c : categoryService.getCategories()) {
+            if (c.getId().equals("gift-cards")) {
+                categoryExist = true;
+            }
+        }
+
+        // if it's not created, create it
+        if (!categoryExist) {
+            // add the category
+            categoryService.addCategory(new Category("gift-cards", "Gift Cards"));
+        }
+
+        // success
+        String giftCardCode = "GC" + System.currentTimeMillis();
+        // Create new Product (gift card)
+        Product giftCard = new Product(
+                giftCardCode,                    // id
+                "Gift Card $" + amount,          // name
+                amount,                          // price
+                "gift-cards",                    // categoryId
+                0,                              // saudiBuyCount
+                0                               // kuwaitBuyCount
+        );
+
+        // Add to products
+        productService.addProduct(giftCard);
+
+        // Return gift card code
+        return giftCardCode;
     }
 }

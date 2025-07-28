@@ -157,4 +157,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("MerchantStock not found."));
         }
     }
+
+    // Extra: buy gift cards
+    @PostMapping("/buy-gift-card/{userId}/{amount}")
+    public ResponseEntity<?> buyGiftCard(@PathVariable("userId") String userId, @PathVariable("amount") Double amount) {
+        String response = userService.buyGiftCard(userId, amount);
+
+        if (response.startsWith("GC")) {
+            // Success - response is the gift card code
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse("Gift card purchased successfully. Code: " + response));
+        } else if (response.equals("2")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Invalid amount. Choose: 10, 20, 50, 80, or 100"));
+        } else if (response.equals("3")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("User not found"));
+        } else { // "4"
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse("Insufficient balance"));
+        }
+    }
 }
